@@ -116,4 +116,4 @@ if __name__ == "__main__":
     # Créer le dossier de téléversement s'il n'existe pas
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
-    app.run(debug=True, port=5004)
+    app.run(debug=false, port=5000)
